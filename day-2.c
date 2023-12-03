@@ -4,18 +4,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define PART_TWO true
+
 /* maximum possible cube counts corresponding with colours */
 uint32_t colour_counts[] = {12, 13, 14};
 char *colour_names[] = {"red", "green", "blue"};
-size_t total_colours = sizeof(colour_names) / sizeof(char*);
+
+#define TOTAL_COLOURS (sizeof(colour_names) / sizeof(char *))
 
 /* determine if a line has cubes that are possible given our defined
  * constants */
-bool is_roll_possible(char *bag_roll) {
+bool is_roll_possible(char *bag_roll, uint32_t highest_colours[TOTAL_COLOURS]) {
     char *comma_save = bag_roll;
 
     /* "3 blue", "4 red", etc. */
     char *cube_section = strtok_r(comma_save, ",", &comma_save);
+
+    bool roll_possible = true;
 
     while (cube_section != NULL) {
         /* skip space */
@@ -33,10 +38,14 @@ bool is_roll_possible(char *bag_roll) {
 
         uint32_t colours_possible = 0;
 
-        for (size_t i = 0; i < total_colours; i++) {
+        for (size_t i = 0; i < TOTAL_COLOURS; i++) {
             if (strcmp(cube_colour, colour_names[i]) == 0) {
                 if (cube_count > colour_counts[i]) {
-                    return false;
+                    roll_possible = false;
+                }
+
+                if (cube_count > highest_colours[i]) {
+                    highest_colours[i] = cube_count;
                 }
 
                 break;
@@ -46,10 +55,10 @@ bool is_roll_possible(char *bag_roll) {
         cube_section = strtok_r(comma_save, ",", &comma_save);
     }
 
-    return true;
+    return roll_possible;
 }
 
-bool is_line_possible(char *line) {
+bool is_line_possible(char *line, uint32_t *power) {
     /* skip "Game x: " */
     while (line[0] != ':') {
         line++;
@@ -60,15 +69,23 @@ bool is_line_possible(char *line) {
     char *semicolon_save = line;
     char *bag_roll = strtok_r(line, ";", &semicolon_save);
 
+    bool line_possible = true;
+
+    uint32_t highest_colours[TOTAL_COLOURS] = {0};
+
     while (bag_roll != NULL) {
-        if (!is_roll_possible(bag_roll)) {
-            return false;
+        if (!is_roll_possible(bag_roll, highest_colours)) {
+            line_possible = false;
         }
 
         bag_roll = strtok_r(semicolon_save, ";", &semicolon_save);
     }
 
-    return true;
+    for (int i = 0; i < TOTAL_COLOURS; i++) {
+        *power *= highest_colours[i];
+    }
+
+    return line_possible;
 }
 
 int main(int argc, char **argv) {
@@ -92,18 +109,25 @@ int main(int argc, char **argv) {
 
     char *line = strtok(file_buffer, "\n");
 
+    /* sum of fewest amounts of cubes needed for each line, multipled
+     * together */
+    uint32_t cube_power_sum = 0;
+
     while (line != NULL) {
-        if (is_line_possible(line)) {
+        uint32_t power = 1;
+
+        if (is_line_possible(line, &power)) {
             // printf("game %d possible\n", game_id);
             game_id_sum += game_id;
         }
 
+        cube_power_sum += power;
         game_id++;
 
         line = strtok(NULL, "\n");
     }
 
-    printf("%d\n", game_id_sum);
+    printf("%d\n", PART_TWO ? cube_power_sum : game_id_sum);
 
     free(file_buffer);
 }
