@@ -18,18 +18,6 @@ void grid_init(Grid *grid) {
 
 void grid_destroy(Grid *grid) { free(grid->grid); }
 
-int grid_clamp_row(Grid *grid, int row) {
-    if (row < 0) {
-        return 0;
-    }
-
-    if (row > grid->rows) {
-        return grid->rows;
-    }
-
-    return row;
-}
-
 size_t grid_get_index(Grid *grid, uint32_t row, uint32_t column) {
     return row * grid->columns + column;
 }
