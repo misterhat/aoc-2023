@@ -107,11 +107,11 @@ int main(int argc, char **argv) {
 
     uint32_t game_id = 1;
 
-    char *line = strtok(file_buffer, "\n");
-
     /* sum of fewest amounts of cubes needed for each line, multipled
      * together */
     uint32_t cube_power_sum = 0;
+
+    char *line = strtok(file_buffer, "\n");
 
     while (line != NULL) {
         uint32_t power = 1;
