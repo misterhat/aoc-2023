@@ -131,4 +131,6 @@ int main(int argc, char **argv) {
     printf("%d\n", PART_TWO ? cube_power_sum : game_id_sum);
 
     free(file_buffer);
+
+    return 0;
 }
