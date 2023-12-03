@@ -15,12 +15,12 @@ char *colour_names[] = {"red", "green", "blue"};
 /* determine if a line has cubes that are possible given our defined
  * constants */
 bool is_roll_possible(char *bag_roll, uint32_t highest_colours[TOTAL_COLOURS]) {
+    bool roll_possible = true;
+
     char *comma_save = bag_roll;
 
     /* "3 blue", "4 red", etc. */
     char *cube_section = strtok_r(comma_save, ",", &comma_save);
-
-    bool roll_possible = true;
 
     while (cube_section != NULL) {
         /* skip space */
@@ -66,12 +66,13 @@ bool is_line_possible(char *line, uint32_t *power) {
 
     line++;
 
-    char *semicolon_save = line;
-    char *bag_roll = strtok_r(line, ";", &semicolon_save);
+    /* the highest rolls for each colour on this line */
+    uint32_t highest_colours[TOTAL_COLOURS] = {0};
 
     bool line_possible = true;
 
-    uint32_t highest_colours[TOTAL_COLOURS] = {0};
+    char *semicolon_save = line;
+    char *bag_roll = strtok_r(line, ";", &semicolon_save);
 
     while (bag_roll != NULL) {
         if (!is_roll_possible(bag_roll, highest_colours)) {
