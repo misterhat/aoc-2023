@@ -79,11 +79,12 @@ int main(int argc, char **argv) {
         char *section = line;
         char *save_section = section;
 
+        /* parse our numbers */
         section = strtok_r(save_section, "|", &save_section) + 1;
         section[strlen(section) - 1] = '\0'; /* space before | */
-
         parse_number_section(section, our_numbers, &our_numbers_length);
 
+        /* parse winning numbers */
         section = strtok_r(save_section, "|", &save_section) + 1;
         parse_number_section(section, winning_numbers, &winning_numbers_length);
 
