@@ -5,7 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define PART_TWO true
+
 #define MAX_SECTION_LENGTH 128
+#define MAX_CARDS 255
 
 /* turn a string of numbers into an int array ("1 23 4 56" -> [1, 23, 4, 56]) */
 void parse_number_section(char *section, uint32_t *numbers, size_t *length) {
@@ -34,6 +37,7 @@ void parse_number_section(char *section, uint32_t *numbers, size_t *length) {
             digit_str[digits_length] = '\0';
 
             // printf("digit |%s| %d\n", digit_str, digits_length);
+
             numbers[*length] = atoi(digit_str);
             (*length)++;
 
@@ -64,6 +68,9 @@ int main(int argc, char **argv) {
 
     uint32_t points_sum = 0;
 
+    size_t card_id = 0;
+    uint32_t card_wins[MAX_CARDS] = {0};
+
     char *line = strtok(file_buffer, "\n");
 
     while (line) {
@@ -81,22 +88,52 @@ int main(int argc, char **argv) {
         parse_number_section(section, winning_numbers, &winning_numbers_length);
 
         uint32_t points = 0;
+        uint32_t matching_numbers = 0;
 
         for (int i = 0; i < our_numbers_length; i++) {
             for (int j = 0; j < winning_numbers_length; j++) {
                 if (our_numbers[i] == winning_numbers[j]) {
                     points = points == 0 ? 1 : points * 2;
+                    matching_numbers++;
+
                     break;
                 }
             }
         }
 
+        // printf("card %ld matching %d\n", card_id, matching_numbers);
+
+        uint32_t original_wins = card_wins[card_id];
+
+        for (int i = 0; i < matching_numbers; i++) {
+            card_wins[card_id + 1 + i] += original_wins + 1;
+        }
+
+        /*printf("[");
+
+        for (int i = 0; i < 6; i++) {
+            printf("%d, ", card_wins[i]);
+        }
+
+        printf("]\n");*/
+
         points_sum += points;
+        card_id++;
 
         line = strtok(NULL, "\n");
     }
 
-    printf("%d\n", points_sum);
+    if (PART_TWO) {
+        uint32_t card_sum = 0;
+
+        for (int i = 0; i < card_id; i++) {
+            card_sum += card_wins[i] + 1;
+        }
+
+        printf("%d\n", card_sum);
+    } else {
+        printf("%d\n", points_sum);
+    }
 
     return 0;
 }
