@@ -68,9 +68,6 @@ int main(int argc, char **argv) {
     uint32_t our_numbers[MAX_SECTION_LENGTH];
     uint32_t winning_numbers[MAX_SECTION_LENGTH];
 
-    // size_t our_numbers_length = 0;
-    size_t winning_numbers_length = 0;
-
     uint32_t points_sum = 0;
 
     size_t card_id = 0;
