@@ -7,12 +7,15 @@
 
 #define PART_TWO true
 
+/* maximum amount of numbers in a section between | */
 #define MAX_SECTION_LENGTH 128
+
+/* maximum amount of card lines */
 #define MAX_CARDS 255
 
 /* turn a string of numbers into an int array ("1 23 4 56" -> [1, 23, 4, 56]) */
-void parse_number_section(char *section, uint32_t *numbers, size_t *length) {
-    *length = 0;
+size_t parse_number_section(char *section, uint32_t *numbers) {
+    size_t length = 0;
 
     int digits_length = 0;
     size_t section_length = strlen(section);
@@ -38,12 +41,14 @@ void parse_number_section(char *section, uint32_t *numbers, size_t *length) {
 
             // printf("digit |%s| %d\n", digit_str, digits_length);
 
-            numbers[*length] = atoi(digit_str);
-            (*length)++;
+            numbers[length] = atoi(digit_str);
+            length++;
 
             digits_length = 0;
         }
     }
+
+    return length;
 }
 
 int main(int argc, char **argv) {
@@ -63,7 +68,7 @@ int main(int argc, char **argv) {
     uint32_t our_numbers[MAX_SECTION_LENGTH];
     uint32_t winning_numbers[MAX_SECTION_LENGTH];
 
-    size_t our_numbers_length = 0;
+    // size_t our_numbers_length = 0;
     size_t winning_numbers_length = 0;
 
     uint32_t points_sum = 0;
@@ -82,11 +87,13 @@ int main(int argc, char **argv) {
         /* parse our numbers */
         section = strtok_r(save_section, "|", &save_section) + 1;
         section[strlen(section) - 1] = '\0'; /* space before | */
-        parse_number_section(section, our_numbers, &our_numbers_length);
+        size_t our_numbers_length = parse_number_section(section, our_numbers);
 
         /* parse winning numbers */
         section = strtok_r(save_section, "|", &save_section) + 1;
-        parse_number_section(section, winning_numbers, &winning_numbers_length);
+
+        size_t winning_numbers_length =
+            parse_number_section(section, winning_numbers);
 
         uint32_t points = 0;
         uint32_t matching_numbers = 0;
