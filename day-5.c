@@ -156,15 +156,33 @@ int main(int argc, char **argv) {
         file_buffer += strlen(section) + 1;
     }
 
-    for (size_t i = 0; i < seeds_length; i++) {
-        uint64_t seed = seeds[i];
+    if (PART_TWO) {
+        for (size_t i = 0; i < seeds_length; i += 2) {
+            for (uint64_t j = 0; j < seeds[i + 1]; j++) {
+                uint64_t seed = seeds[i] + j;
 
-        for (int j = 0; j < sections_length; j++) {
-            seed = transform_seed_section(seed, section_splits[j]);
+                for (int k = 0; k < sections_length; k++) {
+                    seed = transform_seed_section(seed, section_splits[k]);
 
-            if (j == sections_length - 1) {
-                if (lowest_location == 0 || seed < lowest_location) {
-                    lowest_location = seed;
+                    if (k == sections_length - 1) {
+                        if (lowest_location == 0 || seed < lowest_location) {
+                            lowest_location = seed;
+                        }
+                    }
+                }
+            }
+        }
+    } else{
+        for (size_t i = 0; i < seeds_length; i++) {
+            uint64_t seed = seeds[i];
+
+            for (int j = 0; j < sections_length; j++) {
+                seed = transform_seed_section(seed, section_splits[j]);
+
+                if (j == sections_length - 1) {
+                    if (lowest_location == 0 || seed < lowest_location) {
+                        lowest_location = seed;
+                    }
                 }
             }
         }
