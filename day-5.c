@@ -148,8 +148,6 @@ int main(int argc, char **argv) {
             }
         }
 
-        printf("\n");
-
         /* the last section will be location */
         if (next_section == NULL) {
             break;
