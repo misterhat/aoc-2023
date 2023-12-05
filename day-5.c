@@ -5,8 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define PART_TWO true
+
 /* maximum amount of initial seeds in "seeds:" line */
 #define MAX_SEED_LENGTH 32
+
+/* maximum amount of x-to-y sections (7 by default) */
+#define MAX_SECTIONS 32
 
 /* turn a string of numbers into an int array ("1 23 4 56" -> [1, 23, 4, 56]) */
 size_t parse_number_section(char *section, uint64_t *numbers) {
@@ -124,6 +129,9 @@ int main(int argc, char **argv) {
 
     uint64_t lowest_location = 0;
 
+    char *section_splits[MAX_SECTIONS] = {0};
+    size_t sections_length = 0;
+
     while (1) {
         char *next_section = strstr(file_buffer, "\n\n");
         char *section = NULL;
@@ -137,16 +145,8 @@ int main(int argc, char **argv) {
             section = file_buffer;
         }
 
-        for (size_t i = 0; i < seeds_length; i++) {
-            seeds[i] =
-                transform_seed_section(seeds[i], strstr(section, ":") + 2);
-
-            if (next_section == NULL) {
-                if (lowest_location == 0 || seeds[i] < lowest_location) {
-                    lowest_location = seeds[i];
-                }
-            }
-        }
+        section_splits[sections_length] = strstr(section, ":") + 2;
+        sections_length++;
 
         /* the last section will be location */
         if (next_section == NULL) {
@@ -154,6 +154,20 @@ int main(int argc, char **argv) {
         }
 
         file_buffer += strlen(section) + 1;
+    }
+
+    for (size_t i = 0; i < seeds_length; i++) {
+        uint64_t seed = seeds[i];
+
+        for (int j = 0; j < sections_length; j++) {
+            seed = transform_seed_section(seed, section_splits[j]);
+
+            if (j == sections_length - 1) {
+                if (lowest_location == 0 || seed < lowest_location) {
+                    lowest_location = seed;
+                }
+            }
+        }
     }
 
     printf("%lu\n", lowest_location);
