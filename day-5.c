@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define PART_TWO true
 
@@ -12,6 +13,9 @@
 
 /* maximum amount of x-to-y sections (7 by default) */
 #define MAX_SECTIONS 32
+
+/* seed coarseness */
+#define SKIP_LENGTH 100000
 
 /* turn a string of numbers into an int array ("1 23 4 56" -> [1, 23, 4, 56]) */
 size_t parse_number_section(char *section, uint64_t *numbers) {
@@ -100,6 +104,16 @@ uint64_t transform_seed_section(uint64_t seed, char *section) {
     return seed;
 }
 
+/* run the seed through all the section transformations and return location */
+uint64_t transform_seed_sections(uint64_t seed, char *sections[],
+                                 size_t sections_length) {
+    for (int i = 0; i < sections_length; i++) {
+        seed = transform_seed_section(seed, sections[i]);
+    }
+
+    return seed;
+}
+
 int main(int argc, char **argv) {
     FILE *input_file = fopen("./day-5.txt", "r");
     fseek(input_file, 0L, SEEK_END);
@@ -129,7 +143,13 @@ int main(int argc, char **argv) {
 
     uint64_t lowest_location = 0;
 
-    char *section_splits[MAX_SECTIONS] = {0};
+    /* the highest and lowest seeds that got us our lowest location */
+    uint64_t lowest_seed_min = 0;
+    uint64_t lowest_seed_max = 0;
+
+    uint64_t lowest_seed = 0;
+
+    char *sections[MAX_SECTIONS] = {0};
     size_t sections_length = 0;
 
     while (1) {
@@ -145,7 +165,7 @@ int main(int argc, char **argv) {
             section = file_buffer;
         }
 
-        section_splits[sections_length] = strstr(section, ":") + 2;
+        sections[sections_length] = strstr(section, ":") + 2;
         sections_length++;
 
         /* the last section will be location */
@@ -158,40 +178,64 @@ int main(int argc, char **argv) {
 
     if (PART_TWO) {
         for (size_t i = 0; i < seeds_length; i += 2) {
-            for (uint64_t j = 0; j < seeds[i + 1]; j++) {
+            /* get a coarse answer for this seed */
+            for (uint64_t j = 0; j < seeds[i + 1]; j += SKIP_LENGTH) {
                 uint64_t seed = seeds[i] + j;
 
-                for (int k = 0; k < sections_length; k++) {
-                    seed = transform_seed_section(seed, section_splits[k]);
+                uint64_t location =
+                    transform_seed_sections(seed, sections, sections_length);
 
-                    if (k == sections_length - 1) {
-                        if (lowest_location == 0 || seed < lowest_location) {
-                            lowest_location = seed;
-                        }
-                    }
+                if (lowest_location == 0 || location < lowest_location) {
+                    lowest_seed_min = seeds[i];
+                    lowest_seed_max = seeds[i] + (seeds[i] + j);
+
+                    lowest_seed = seed;
+                    lowest_location = location;
+
+                    /*printf("lowest seed boundaries min=%lu, max=%lu, "
+                           "start_seed=%lu, location=%lu\n",
+                           lowest_seed_min, lowest_seed_max, seed, location);*/
                 }
             }
         }
-    } else{
-        for (size_t i = 0; i < seeds_length; i++) {
-            uint64_t seed = seeds[i];
 
-            for (int j = 0; j < sections_length; j++) {
-                seed = transform_seed_section(seed, section_splits[j]);
+        /* does negating our seed negate our location? */
+        bool should_decrement =
+            transform_seed_sections(lowest_seed - 1, sections,
+                                    sections_length) < lowest_location;
 
-                if (j == sections_length - 1) {
-                    if (lowest_location == 0 || seed < lowest_location) {
-                        lowest_location = seed;
-                    }
+        uint32_t last_location = 0;
+
+        /* iterate by 1 until it stops getting smaller */
+        while (1) {
+            last_location =
+                transform_seed_sections(lowest_seed, sections, sections_length);
+
+            if (last_location <= lowest_location) {
+                lowest_location = last_location;
+
+                if (lowest_seed > lowest_seed_min &&
+                    lowest_seed < lowest_seed_max) {
+                    lowest_seed += (should_decrement ? -1 : 1);
+                } else {
+                    break;
                 }
+            } else {
+                break;
+            }
+        }
+    } else {
+        for (size_t i = 0; i < seeds_length; i++) {
+            uint64_t location =
+                transform_seed_sections(seeds[i], sections, sections_length);
+
+            if (lowest_location == 0 || location < lowest_location) {
+                lowest_location = location;
             }
         }
     }
 
     printf("%lu\n", lowest_location);
-
-    // uint64_t transformed = transform_seed_section(13, section);
-    // printf("transformed: %lu\n", transformed);
 
     return 0;
 }
