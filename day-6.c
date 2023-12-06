@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define PART_TWO true
+
 /* maximum amount of time/distance pairs */
 #define MAX_RACES 32
 
@@ -44,12 +46,12 @@ size_t parse_number_section(char *section, uint32_t *numbers) {
     return length;
 }
 
-uint32_t race_boat(uint32_t time, uint32_t record_distance) {
+uint64_t race_boat(uint64_t time, uint64_t record_distance) {
     /* amount of times a button-holding time beats record_distance */
-    uint32_t holding_wins = 0;
+    uint64_t holding_wins = 0;
 
     for (int i = 1; i < time - 1; i++) {
-        uint32_t distance = i * (time - i);
+        uint64_t distance = i * (time - i);
 
         holding_wins += distance > record_distance;
         // printf("%u %u\n", i, distance);
@@ -85,11 +87,27 @@ int main(int argc, char **argv) {
     /* should be same length as time */
     parse_number_section(line, distances);
 
-    uint32_t product = 1;
+    if (PART_TWO) {
+        char time_str[255] = {0};
+        char distance_str[255] = {0};
 
-    for (size_t i = 0; i < races_length; i++) {
-        product *= race_boat(times[i], distances[i]);
+        for (size_t i = 0; i < races_length; i++) {
+            sprintf(time_str + strlen(time_str), "%d", times[i]);
+            sprintf(distance_str + strlen(distance_str), "%d", distances[i]);
+        }
+
+        uint64_t time = strtoul(time_str, NULL, 0);
+        uint64_t distance = strtoul(distance_str, NULL, 0);
+        uint64_t holding_wins = race_boat(time, distance);
+
+        printf("%lu\n", holding_wins);
+    } else {
+        uint32_t product = 1;
+
+        for (size_t i = 0; i < races_length; i++) {
+            product *= race_boat(times[i], distances[i]);
+        }
+
+        printf("%u\n", product);
     }
-
-    printf("%u\n", product);
 }
