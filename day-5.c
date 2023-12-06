@@ -143,10 +143,10 @@ int main(int argc, char **argv) {
 
     uint64_t lowest_location = 0;
 
-    /* the highest and lowest seeds that got us our lowest location */
+    /* the lowest seed that got us our lowest location */
     uint64_t lowest_seed_min = 0;
-    uint64_t lowest_seed_max = 0;
 
+    /* the seed that got us our current lowest location */
     uint64_t lowest_seed = 0;
 
     char *sections[MAX_SECTIONS] = {0};
@@ -187,26 +187,20 @@ int main(int argc, char **argv) {
 
                 if (lowest_location == 0 || location < lowest_location) {
                     lowest_seed_min = seeds[i];
-                    lowest_seed_max = seeds[i] + (seeds[i] + j);
 
                     lowest_seed = seed;
                     lowest_location = location;
 
-                    /*printf("lowest seed boundaries min=%lu, max=%lu, "
-                           "start_seed=%lu, location=%lu\n",
-                           lowest_seed_min, lowest_seed_max, seed, location);*/
+                    /*printf("lowest seed boundaries min=%lu, start_seed=%lu, "
+                           "location=%lu\n",
+                           lowest_seed_min, seed, location);*/
                 }
             }
         }
 
-        /* does negating our seed negate our location? */
-        bool should_decrement =
-            transform_seed_sections(lowest_seed - 1, sections,
-                                    sections_length) < lowest_location;
-
         uint32_t last_location = 0;
 
-        /* iterate by 1 until it stops getting smaller */
+        /* decrement by 1 until it stops getting smaller */
         while (1) {
             last_location =
                 transform_seed_sections(lowest_seed, sections, sections_length);
@@ -214,9 +208,8 @@ int main(int argc, char **argv) {
             if (last_location <= lowest_location) {
                 lowest_location = last_location;
 
-                if (lowest_seed > lowest_seed_min &&
-                    lowest_seed < lowest_seed_max) {
-                    lowest_seed += (should_decrement ? -1 : 1);
+                if (lowest_seed > lowest_seed_min) {
+                    lowest_seed--;
                 } else {
                     break;
                 }
