@@ -128,10 +128,9 @@ int main(int argc, char **argv) {
 
     fclose(input_file);
 
-    /* parse the first line */
+    /* parse initial seeds in the first line */
     file_buffer[strchr(file_buffer, '\n') - file_buffer] = '\0';
 
-    /* parse initial seeds */
     uint64_t seeds[MAX_SEED_LENGTH] = {0};
 
     size_t seeds_length =
@@ -143,7 +142,7 @@ int main(int argc, char **argv) {
 
     uint64_t lowest_location = 0;
 
-    /* the lowest seed that got us our lowest location */
+    /* the lowest seed in the iteration that got us our lowest location */
     uint64_t lowest_seed_min = 0;
 
     /* the seed that got us our current lowest location */
@@ -178,8 +177,10 @@ int main(int argc, char **argv) {
 
     if (PART_TWO) {
         for (size_t i = 0; i < seeds_length; i += 2) {
+            uint64_t skip_length = SKIP_LENGTH > seeds[i + 1] ? 1 : SKIP_LENGTH;
+
             /* get a coarse answer for this seed */
-            for (uint64_t j = 0; j < seeds[i + 1]; j += SKIP_LENGTH) {
+            for (uint64_t j = 0; j < seeds[i + 1]; j += skip_length) {
                 uint64_t seed = seeds[i] + j;
 
                 uint64_t location =
@@ -198,7 +199,7 @@ int main(int argc, char **argv) {
             }
         }
 
-        uint32_t last_location = 0;
+        uint64_t last_location = 0;
 
         /* decrement by 1 until it stops getting smaller */
         while (1) {
