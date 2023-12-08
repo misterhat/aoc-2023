@@ -110,4 +110,8 @@ int main(int argc, char **argv) {
 
         printf("%u\n", product);
     }
+
+    free(file_buffer);
+
+    return 0;
 }

@@ -5,12 +5,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define PART_TWO true
+
 #define MAX_HANDS_LENGTH 1024
 
 #define HAND_LENGTH 5
 
+#if (PART_TWO == true)
+const char CARD_LABELS[] = {'A', 'K', 'Q', 'T', '9', '8', '7',
+                            '6', '5', '4', '3', '2', 'J'};
+#else
 const char CARD_LABELS[] = {'A', 'K', 'Q', 'J', 'T', '9', '8',
                             '7', '6', '5', '4', '3', '2'};
+#endif
 
 #define CARDS_LENGTH (sizeof(CARD_LABELS) / sizeof(char))
 
@@ -116,8 +123,8 @@ size_t index_of_label(char label) {
 }
 
 int hand_compare(const void *a, const void *b) {
-    Hand *hand_a = (Hand*)a;
-    Hand *hand_b = (Hand*)b;
+    Hand *hand_a = (Hand *)a;
+    Hand *hand_b = (Hand *)b;
 
     if (hand_b->type < hand_a->type) {
         return 1;
@@ -137,6 +144,53 @@ int hand_compare(const void *a, const void *b) {
     }
 
     return 0;
+}
+
+/* find the best hand by brute replacing the J at joker_index */
+void get_jokerfied_hand(char hand[HAND_LENGTH], int joker_index,
+                        HandType *highest_type) {
+    /* amount of jokers */
+    size_t joker_length = 0;
+
+    int hand_index = 0;
+
+    for (size_t i = 0; i < HAND_LENGTH; i++) {
+        if (hand[i] == 'J') {
+            hand_index = i;
+            joker_length++;
+        }
+    }
+
+    if (joker_length == 0) {
+        return;
+    }
+
+    for (int i = 0; i < CARDS_LENGTH; i++) {
+        if (CARD_LABELS[i] == 'J') {
+            continue;
+        }
+
+        char new_hand[HAND_LENGTH] = {0};
+        memcpy(new_hand, hand, 5);
+
+        new_hand[hand_index] = CARD_LABELS[i];
+
+        if (joker_length == 1) {
+            HandType type = hand_to_type(new_hand);
+
+            if (type > *highest_type) {
+                *highest_type = type;
+            }
+
+            if (type == FIVE_OF_A_KIND) {
+                return;
+            }
+        }
+
+        get_jokerfied_hand(new_hand, joker_index + 1, highest_type);
+    }
+
+    return;
 }
 
 int main(int argc, char **argv) {
@@ -161,10 +215,21 @@ int main(int argc, char **argv) {
     while (line) {
         Hand *hand = &hands[hands_length];
 
-        char *hand_chrs = hand->hand;
-        memcpy(hand_chrs, line, 5);
+        memcpy(hand->hand, line, 5);
 
-        hand->type = hand_to_type(hand_chrs);
+        if (PART_TWO) {
+            HandType highest_type = 0;
+            get_jokerfied_hand(hand->hand, 0, &highest_type);
+
+            if (highest_type > 0) {
+                hand->type = highest_type;
+            } else {
+                hand->type = hand_to_type(hand->hand);
+            }
+        } else {
+            hand->type = hand_to_type(hand->hand);
+        }
+
         hand->bid = atoi(line + 6);
 
         hands_length++;
@@ -179,8 +244,13 @@ int main(int argc, char **argv) {
     uint32_t total_winnings = 0;
 
     for (int i = 0; i < hands_length; i++) {
+        // printf("%.5s %d\n", hands[i].hand, hands[i].type);
         total_winnings += (i + 1) * hands[i].bid;
     }
+
+    /*HandType highest_type = 0;
+    get_jokerfied_hand("T55J5", 0, &highest_type);
+    printf("%d\n", highest_type);*/
 
     printf("%u\n", total_winnings);
 
