@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PART_TWO false
+#define PART_TWO true
 
 #define MAX_HANDS_LENGTH 1024
 
@@ -165,13 +165,13 @@ void get_jokerfied_hand(char hand[HAND_LENGTH], int joker_index,
         return;
     }
 
+    char new_hand[HAND_LENGTH] = {0};
+    memcpy(new_hand, hand, 5);
+
     for (int i = 0; i < CARDS_LENGTH; i++) {
         if (CARD_LABELS[i] == 'J') {
             continue;
         }
-
-        char new_hand[HAND_LENGTH] = {0};
-        memcpy(new_hand, hand, 5);
 
         new_hand[hand_index] = CARD_LABELS[i];
 
