@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PART_TWO true
+#define PART_TWO false
 
 #define MAX_HANDS_LENGTH 1024
 
@@ -189,8 +189,6 @@ void get_jokerfied_hand(char hand[HAND_LENGTH], int joker_index,
 
         get_jokerfied_hand(new_hand, joker_index + 1, highest_type);
     }
-
-    return;
 }
 
 int main(int argc, char **argv) {
@@ -244,7 +242,7 @@ int main(int argc, char **argv) {
     uint32_t total_winnings = 0;
 
     for (int i = 0; i < hands_length; i++) {
-        // printf("%.5s %d\n", hands[i].hand, hands[i].type);
+        printf("%.5s %d\n", hands[i].hand, hands[i].type);
         total_winnings += (i + 1) * hands[i].bid;
     }
 
